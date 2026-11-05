@@ -45,6 +45,37 @@ function addToCart(productId, title, price, thumbnail) {
     saveCart(cart); 
     alert(`${title} has been added to your cart!`); // 已替换为英文弹窗
 }
+// ================= 新增：模拟支付逻辑 =================
+function processPayment(event) {
+    event.preventDefault(); // 阻止表单默认的刷新行为
+
+    // 1. 简单验证表单是否填写
+    const name = document.getElementById('name').value;
+    const address = document.getElementById('address').value;
+    const card = document.getElementById('card').value;
+
+    if (!name || !address || !card) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    // 2. 模拟支付处理中 (按钮变成加载状态)
+    const payBtn = document.querySelector('.btn-pay');
+    payBtn.textContent = 'Processing...';
+    payBtn.disabled = true;
+
+    // 3. 使用 setTimeout 模拟网络延迟 1.5 秒后支付成功
+    setTimeout(() => {
+        // 支付成功提示
+        alert(`🎉 Payment Successful!\n\nThank you for your purchase, ${name}.\nYour order is on the way!`);
+        
+        // 4. 清空购物车
+        saveCart([]); 
+        
+        // 5. 跳转回首页
+        window.location.href = 'index.html';
+    }, 1500);
+}
 
 // 5. 页面加载完成后，自动显示一次购物车数量
 document.addEventListener('DOMContentLoaded', () => {
