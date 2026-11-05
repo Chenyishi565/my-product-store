@@ -21,19 +21,20 @@
     </header>
 
     <main class="cart-container">
-        <!-- Empty cart state -->
         <div id="cart-empty" style="display: none; text-align: center; padding: 50px;">
             <h2>Your cart is empty 🛒</h2>
             <p><a href="index.html" style="color: #3498db; text-decoration: none;">Continue Shopping</a></p>
         </div>
         
-        <!-- Cart items container -->
         <div id="cart-items"></div>
 
-        <!-- Total summary -->
         <div id="cart-summary" class="cart-summary" style="display: none;">
             <h3>Total: <span id="total-price">$0.00</span></h3>
-            <button class="btn-checkout" onclick="alert('Checkout is not available yet!')">Checkout</button>
+            <div>
+                <!-- 新增：清空按钮 -->
+                <button class="btn-clear" onclick="handleClearCart()">Clear Cart</button>
+                <button class="btn-checkout" onclick="alert('Checkout is not available yet!')">Checkout</button>
+            </div>
         </div>
     </main>
 
@@ -120,6 +121,14 @@
             cart = cart.filter(i => i.id !== productId);
             saveCart(cart); 
             renderCart(); 
+        }
+
+        // 新增：清空购物车功能
+        function handleClearCart() {
+            if (confirm('Are you sure you want to clear your entire cart?')) {
+                saveCart([]); // 保存一个空数组
+                renderCart(); // 重新渲染页面
+            }
         }
 
         renderCart();

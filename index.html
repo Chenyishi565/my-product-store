@@ -18,10 +18,22 @@
 
     <header>
         <h1>Featured Products</h1>
+        <!-- 新增：搜索和分类过滤栏 -->
+        <div class="controls">
+            <input type="text" id="search-input" placeholder="Search products...">
+            <select id="category-select">
+                <option value="">All Categories</option>
+                <!-- 分类由 JS 动态加载 -->
+            </select>
+        </div>
     </header>
 
     <main>
-        <div id="loading">Loading products...</div>
+        <!-- 新增：Loading Spinner 动画 -->
+        <div id="loading" class="spinner-container">
+            <div class="spinner"></div>
+            <p>Loading products...</p>
+        </div>
         <div id="product-container" class="product-grid"></div>
     </main>
 
@@ -30,16 +42,54 @@
     <script>
         const productContainer = document.getElementById('product-container');
         const loadingElement = document.getElementById('loading');
-        const API_URL = 'https://dummyjson.com/products';
+        const searchInput = document.getElementById('search-input');
+        const categorySelect = document.getElementById('category-select');
+        
+        let currentSearch = '';
+        let currentCategory = '';
 
-        async function fetchProducts() {
+        // 1. 初始化：加载分类数据
+        async function loadCategories() {
             try {
-                // 发送 GET 请求获取数据
-                const response = await fetch(API_URL);
+                const res = await fetch('https://dummyjson.com/products/categories');
+                const categories = await res.json();
+                categories.forEach(cat => {
+                    const catName = typeof cat === 'string' ? cat : cat.name;
+                    const option = document.createElement('option');
+                    option.value = catName;
+                    option.textContent = catName.charAt(0).toUpperCase() + catName.slice(1);
+                    categorySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load categories', error);
+            }
+        }
+
+        // 2. 核心：获取商品数据
+        async function fetchProducts() {
+            // 显示加载动画
+            loadingElement.style.display = 'flex';
+            productContainer.innerHTML = ''; // 清空旧数据
+
+            // 根据搜索或分类构建不同的 API URL
+            let url = 'https://dummyjson.com/products';
+            if (currentSearch) {
+                url = `https://dummyjson.com/products/search?q=${currentSearch}`;
+            } else if (currentCategory) {
+                url = `https://dummyjson.com/products/category/${currentCategory}`;
+            }
+
+            try {
+                const response = await fetch(url);
                 const data = await response.json();
                 
                 loadingElement.style.display = 'none';
                 
+                if (data.products.length === 0) {
+                    productContainer.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">No products found 😭</p>';
+                    return;
+                }
+
                 data.products.forEach(product => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
@@ -59,10 +109,40 @@
                     productContainer.appendChild(card);
                 });
             } catch (error) {
-                loadingElement.textContent = 'Failed to load products. Please refresh.';
+                loadingElement.style.display = 'none';
+                productContainer.innerHTML = '<p style="text-align:center;">Failed to load products. Please refresh.</p>';
                 console.error(error);
             }
         }
+
+        // --- 事件监听 ---
+        
+        // 搜索框输入 (防抖处理)
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearch = e.target.value.trim();
+                if (currentSearch) { // 如果搜索了，重置分类
+                    categorySelect.value = '';
+                    currentCategory = '';
+                }
+                fetchProducts();
+            }, 500); // 停止输入 500ms 后才发请求
+        });
+
+        // 分类选择改变
+        categorySelect.addEventListener('change', (e) => {
+            currentCategory = e.target.value;
+            if (currentCategory) { // 如果选了分类，清空搜索
+                searchInput.value = '';
+                currentSearch = '';
+            }
+            fetchProducts();
+        });
+
+        // 启动
+        loadCategories();
         fetchProducts();
     </script>
 </body>
