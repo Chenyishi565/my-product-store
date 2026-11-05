@@ -1,49 +1,56 @@
-// 获取 HTML 中的元素
-const productContainer = document.getElementById('product-container');
-const loadingElement = document.getElementById('loading');
+// ================= 全局购物车逻辑 =================
 
-// 定义 API URL
-const API_URL = 'https://dummyjson.com/products';
+// 1. 从本地存储(localStorage)获取购物车数据
+function getCart() {
+    const cart = localStorage.getItem('myShoppingCart');
+    return cart ? JSON.parse(cart) : []; // 如果有数据就转换，没有就返回空数组
+}
 
-// 定义一个函数来获取数据
-async function fetchProducts() {
-    try {
-        // 发起 GET 请求获取数据 (这就是老师白板上强调的 GET)
-        const response = await fetch(API_URL);
-        
-        // 将返回的数据转换为 JSON 格式
-        const data = await response.json();
-        
-        // 隐藏加载提示
-        loadingElement.style.display = 'none';
-        
-        // 获取产品数组
-        const products = data.products;
-        
-        // 遍历产品，为每个产品创建一个卡片
-        products.forEach(product => {
-            // 创建一个新的 div 元素作为卡片
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            
-            // 填入产品的信息 (图片、标题、价格)
-            // 注意：dummyjson 返回的图片字段叫 thumbnail，标题叫 title，价格叫 price
-            card.innerHTML = `
-                <img src="${product.thumbnail}" alt="${product.title}">
-                <h3>${product.title}</h3>
-                <p class="price">$${product.price}</p>
-            `;
-            
-            // 将卡片添加到页面容器中
-            productContainer.appendChild(card);
-        });
+// 2. 保存购物车数据，并更新右上角的数字角标
+function saveCart(cart) {
+    localStorage.setItem('myShoppingCart', JSON.stringify(cart));
+    updateCartBadge();
+}
 
-    } catch (error) {
-        // 如果请求失败，显示错误信息
-        loadingElement.textContent = '抱歉，产品信息加载失败，请稍后再试。';
-        console.error('Error fetching data:', error);
+// 3. 更新导航栏的红色角标数量
+function updateCartBadge() {
+    const cart = getCart();
+    // 计算总件数 (比如 2 个苹果 + 3 个香蕉 = 5)
+    const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    
+    const badge = document.getElementById('cart-badge');
+    if (badge) {
+        badge.textContent = totalCount;
+        badge.style.display = totalCount > 0 ? 'block' : 'none'; // 有商品才显示
     }
 }
 
-// 页面加载后立即执行这个函数
-fetchProducts();
+// 4. 加入购物车逻辑
+function addToCart(productId, title, price, thumbnail) {
+    let cart = getCart();
+    
+    // 查找购物车里是不是已经有这个商品了
+    const existingItem = cart.find(item => item.id === productId);
+    
+    if (existingItem) {
+        // 如果已经有，数量 +1
+        existingItem.quantity += 1;
+    } else {
+        // 如果没有，把商品信息存进数组，数量默认是 1
+        cart.push({
+            id: productId,
+            title: title,
+            price: price,
+            thumbnail: thumbnail,
+            quantity: 1 
+        });
+    }
+    
+    saveCart(cart); // 保存数据
+    alert(`${title} 已成功加入购物车！`); // 弹窗提示
+}
+
+// 5. 页面加载完成后，自动显示一次购物车数量（防止刷新页面数字消失）
+document.addEventListener('DOMContentLoaded', () => {
+    updateCartBadge();
+});

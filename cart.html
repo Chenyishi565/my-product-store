@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的网店 - 购物车</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">MyShop</a>
+        <a href="cart.html" class="cart-link">
+            🛒 购物车
+            <span id="cart-badge" class="badge" style="display: none;">0</span>
+        </a>
+    </nav>
+
+    <header>
+        <h1>我的购物车</h1>
+    </header>
+
+    <main class="cart-container">
+        <!-- 购物车为空时的提示 -->
+        <div id="cart-empty" style="display: none; text-align: center; padding: 50px;">
+            <h2>您的购物车空空如也 🛒</h2>
+            <p><a href="index.html" style="color: #3498db; text-decoration: none;">去逛逛商品列表</a></p>
+        </div>
+        
+        <!-- 购物车商品列表容器 -->
+        <div id="cart-items"></div>
+
+        <!-- 底部总计区域 -->
+        <div id="cart-summary" class="cart-summary" style="display: none;">
+            <h3>总计: <span id="total-price">$0.00</span></h3>
+            <button class="btn-checkout" onclick="alert('暂未接入支付系统！')">去结算</button>
+        </div>
+    </main>
+
+    <!-- 引入全局公共 JS -->
+    <script src="app.js"></script>
+    
+    <!-- 购物车页面专属逻辑 -->
+    <script>
+        const cartItemsContainer = document.getElementById('cart-items');
+        const emptyState = document.getElementById('cart-empty');
+        const summaryContainer = document.getElementById('cart-summary');
+        const totalPriceElement = document.getElementById('total-price');
+
+        function renderCart() {
+            const cart = getCart(); // 从 app.js 调用
+            cartItemsContainer.innerHTML = ''; // 清空容器
+
+            if (cart.length === 0) {
+                emptyState.style.display = 'block';
+                summaryContainer.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            summaryContainer.style.display = 'flex';
+
+            let totalPrice = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                totalPrice += itemTotal;
+
+                const row = document.createElement('div');
+                row.className = 'cart-item';
+                row.innerHTML = `
+                    <img src="${item.thumbnail}" alt="${item.title}">
+                    <div class="item-info">
+                        <h3>${item.title}</h3>
+                        <p>单价: $${item.price}</p>
+                    </div>
+                    <div class="item-actions">
+                        <div class="quantity-control">
+                            <button class="btn-decrease" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
+                            <span class="quantity-num">${item.quantity}</span>
+                            <button class="btn-increase">+</button>
+                        </div>
+                        <p class="item-total">$${itemTotal.toFixed(2)}</p>
+                        <button class="btn-delete">删除</button>
+                    </div>
+                `;
+
+                // 增加数量
+                row.querySelector('.btn-increase').addEventListener('click', () => {
+                    updateQuantity(item.id, item.quantity + 1);
+                });
+
+                // 减少数量
+                row.querySelector('.btn-decrease').addEventListener('click', () => {
+                    if (item.quantity > 1) {
+                        updateQuantity(item.id, item.quantity - 1);
+                    }
+                });
+
+                // 删除商品
+                row.querySelector('.btn-delete').addEventListener('click', () => {
+                    if (confirm('确定要删除这个商品吗？')) {
+                        removeFromCart(item.id);
+                    }
+                });
+
+                cartItemsContainer.appendChild(row);
+            });
+
+            totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+        }
+
+        // 修改数量
+        function updateQuantity(productId, newQuantity) {
+            let cart = getCart();
+            const item = cart.find(i => i.id === productId);
+            if (item) {
+                item.quantity = newQuantity;
+                saveCart(cart); // 保存到 localStorage
+                renderCart(); // 重新渲染
+            }
+        }
+
+        // 删除商品
+        function removeFromCart(productId) {
+            let cart = getCart();
+            cart = cart.filter(i => i.id !== productId);
+            saveCart(cart); 
+            renderCart(); 
+        }
+
+        // 页面加载时渲染购物车
+        renderCart();
+    </script>
+</body>
+</html>
