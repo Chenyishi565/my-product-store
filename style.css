@@ -1,8 +1,6 @@
-/* 基础重置 */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; }
 
-/* ================= 顶部导航栏 ================= */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -26,7 +24,6 @@ body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; }
     align-items: center;
     gap: 5px;
 }
-/* 购物车数量红点 */
 .badge {
     background-color: #e74c3c;
     color: white;
@@ -38,7 +35,6 @@ body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; }
 
 header { text-align: center; margin: 30px 0; color: #2c3e50; }
 
-/* ================= 商品列表页样式 ================= */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -63,7 +59,6 @@ header { text-align: center; margin: 30px 0; color: #2c3e50; }
 .product-card h3 { font-size: 1.1rem; margin-bottom: 10px; color: #34495e; height: 2.4em; overflow: hidden; }
 .product-card .price { font-size: 1.2rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
 
-/* 按钮通用样式 */
 button {
     cursor: pointer;
     border: none;
@@ -79,7 +74,6 @@ button {
 }
 .btn-add-cart:hover { background-color: #2980b9; }
 
-/* ================= 购物车页面样式 ================= */
 .cart-container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
 .cart-item {
     display: flex;
@@ -100,7 +94,6 @@ button {
     align-items: center;
     gap: 20px;
 }
-/* 加减数量控制器 */
 .quantity-control {
     display: flex;
     align-items: center;
@@ -118,11 +111,9 @@ button {
 .quantity-num { padding: 0 10px; font-weight: bold; }
 .item-total { font-weight: bold; color: #e74c3c; min-width: 70px; text-align: right; }
 
-/* 删除按钮 */
 .btn-delete { background-color: #fee2e2; color: #e74c3c; padding: 5px 10px; }
 .btn-delete:hover { background-color: #fca5a5; }
 
-/* 底部总计结算栏 */
 .cart-summary {
     display: flex;
     justify-content: flex-end;
